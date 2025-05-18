@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from sqlalchemy import (
     Column,
     Integer,
@@ -23,12 +23,13 @@ class TransactionORM(Base):
     entity = Column(String(100), nullable=True)
     totalamount = Column(Float, nullable=False)
     unitprice = Column(Float, nullable=False)
+    units = Column(Integer, nullable=True)
     createdat = Column(DateTime, nullable=True, default=dt.datetime.now())
 
 class AddBalancePayload(BaseModel):
     clientid: int
     amount: float
-    @validator('amount')
+    @field_validator('amount')
     def amount_must_be_positive(cls, v):
         if v <= 0:
             raise ValueError('amount must be greater than 0')
@@ -46,6 +47,7 @@ class Transaction(BaseModel):
     clientid: int
     entity: str
     unitprice: float
+    units: int
     totalamount: float
     createdat: dt.datetime
     model_config = {

@@ -9,7 +9,7 @@ transactionRouter = APIRouter(prefix="/transaction", tags=["Transaction"])
 @transactionRouter.put("/addBalance")
 async def addBalance(requestBody: AddBalancePayload)-> JSONResponse:
     try:
-        transactionId = await createEntry(client_id=requestBody.clientid, entity=CASH_ENTITY, unitprice=1, totalamount=requestBody.amount)
+        transactionId = await createEntry(client_id=requestBody.clientid, entity=CASH_ENTITY, unitprice=1, totalamount=requestBody.amount, units=requestBody.amount)
         response = AddBalanceResponse(
             transactionid = transactionId,
             message= f"Balance added successfully with transaction id",
