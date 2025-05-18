@@ -9,7 +9,6 @@ load_dotenv(".env")
 VALKEY_URL = os.getenv("VALKEY_URL")
 VALKEY_PASSWORD = os.getenv("VALKEY_PASSWORD")
 POSTGRES_URL = os.getenv("POSTGRES_URL")
-
 # Redis client singleton
 _redis = None
 

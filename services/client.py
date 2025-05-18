@@ -10,6 +10,6 @@ async def createClient(clientData: CreateClientPayload, db: AsyncSession = db) -
     await db.commit()
     return client.clientid
 
-async def getClientById( client_id: int, db: AsyncSession = db) -> ClientORM:
-    result = await db.execute(select(ClientORM).where(ClientORM.clientId == client_id))
+async def getClientById( clientId: int, db: AsyncSession = db) -> ClientORM:
+    result = await db.execute(select(ClientORM).where(ClientORM.clientid == clientId))
     return result.scalar_one_or_none()
