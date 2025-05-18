@@ -6,8 +6,9 @@ from sqlalchemy.orm import sessionmaker
 
 # Load environment variables
 load_dotenv(".env")
-
-
+VALKEY_URL = os.getenv("VALKEY_URL")
+VALKEY_PASSWORD = os.getenv("VALKEY_PASSWORD")
+POSTGRES_URL = os.getenv("POSTGRES_URL")
 
 # Redis client singleton
 _redis = None
@@ -18,11 +19,11 @@ async def get_redis() -> Redis:
         _redis = Redis.from_url(
             VALKEY_URL,
             password=VALKEY_PASSWORD,
-            decode_responses=True  # This auto-decodes byte strings
+            decode_responses=True
         )
     return _redis
 
-    # SQLAlchemy async engine and sessionmaker singleton
+# SQLAlchemy async engine and sessionmaker singleton
 _engine = None
 _async_session = None
 
@@ -42,7 +43,15 @@ def get_sessionmaker():
         )
     return _async_session
 
-async def get_db() -> AsyncSession:
-    async_session = get_sessionmaker()
-    async with async_session() as session:
-        yield session
+# Create a global db variable (not recommended for FastAPI endpoints)
+dbSession = get_sessionmaker()
+db = dbSession()
+# Usage example (outside FastAPI):
+# import asyncio
+# from config import get_db_session
+#
+# async def main():
+#     db = await get_db_session()
+#     # use db as AsyncSession
+#
+# asyncio.run(main())
