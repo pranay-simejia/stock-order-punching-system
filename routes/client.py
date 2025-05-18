@@ -1,7 +1,10 @@
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
-from services.client import autoPlaceMaxOrder, createClient
+from services.client import createClient, getClientById
 from dto.client import AutoPlaceOrderPayload, BaseResponse, CreateClientPayload, CreteClientResponse
+from dto.client import FindClientResponse, ClientData  # Add ClientData import
+from services.client import autoPlaceMaxOrder, createClient
+
 
 
 clientRouter = APIRouter(prefix="/client", tags=["clients"])
@@ -24,6 +27,33 @@ async def createClientRouter(clientData: CreateClientPayload)-> JSONResponse:
         print(f"Error creating client: {str(e)} , {clientData}")
         raise HTTPException(status_code=500, detail=str(e))
     
+@clientRouter.get("/find/{clientId}", status_code=status.HTTP_200_OK)
+async def findClientByID(clientId: int):
+    try:
+        client = await getClientById(clientId)
+        if not client:
+            raise HTTPException(status_code=404, detail="Client not found")
+        # Convert ORM to Pydantic
+        client_data = ClientData(
+            clientid=client.clientid,
+            name=client.name,
+            age=client.age
+        )
+        response = FindClientResponse(
+            client=client_data,
+            message=f"Client found successfully with id: {clientId}",
+            isSuccess=True,
+            error=None
+        )
+        return JSONResponse(
+            content=response.model_dump(),
+            status_code=status.HTTP_200_OK
+        )
+    except Exception as e:
+        print(f"Error finding client: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
 @clientRouter.post("/autoPlaceOrder")
 async def autoPlaceOrder(requestBody: AutoPlaceOrderPayload):
     try:

@@ -5,6 +5,7 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+
 class ClientORM(Base):
     __tablename__ = "client"
     clientid = Column(Integer, primary_key=True, autoincrement=True)
@@ -29,6 +30,13 @@ class BaseResponse(BaseModel):
 class CreteClientResponse(BaseResponse):
     clientId: int
 
+class ClientData(BaseModel):
+    clientid: int
+    name: str
+    age: int
+
+class FindClientResponse(BaseResponse):
+    client: ClientData
 class AutoPlaceOrderPayload(BaseModel):
     clientId: int
     maxAmount: float
