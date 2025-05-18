@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, field_validator
 from typing import Optional
 import datetime as dt
 from sqlalchemy import Column, Integer, String, DateTime
@@ -37,3 +37,18 @@ class ClientData(BaseModel):
 
 class FindClientResponse(BaseResponse):
     client: ClientData
+class AutoPlaceOrderPayload(BaseModel):
+    clientId: int
+    maxAmount: float
+    maxStocks: int
+    distributeEqually: bool = True
+    @field_validator("maxAmount")
+    def amount_must_be_positive(cls, v):
+        if v <= 0:
+            raise ValueError('amount must be greater than 0')
+        return v
+    @field_validator("distributeEqually")
+    def distributeEqually(cls, v):
+        if not v:
+            raise ValueError('distributeEqually must be True')
+        return v

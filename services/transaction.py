@@ -1,19 +1,25 @@
 from sqlalchemy import select, func
+from constants import CASH_ENTITY
 from dto.transactions import Transaction, TransactionORM
 from sqlalchemy.ext.asyncio import AsyncSession
 from config import db
 from typing import List
 
-async def createEntry(client_id: int, entity: str, unitprice: float, totalamount: float, db: AsyncSession = db) -> int:
-    transaction = TransactionORM(clientid=client_id, entity=entity, unitprice=unitprice, totalamount=totalamount)
+async def createEntry(client_id: int, entity: str, unitprice: float, units: int, totalamount: float, db: AsyncSession = db) -> int:
+    transaction = TransactionORM(clientid=client_id, entity=entity, unitprice=unitprice, totalamount=totalamount, units=units)
     db.add(transaction)
     await db.commit()
     return transaction.transactionid
 
+async def bulkCreateEntry(transactions: List[TransactionORM], db: AsyncSession = db) -> List[int]:
+    db.add_all(transactions)
+    await db.commit()
+    return [transaction.transactionid for transaction in transactions]
+
 async def getBalance(client_id: int, db: AsyncSession = db) -> float:
     stmt = select(
         func.coalesce(func.sum(TransactionORM.totalamount), 0.0)
-    ).where(TransactionORM.clientid == client_id)
+    ).where(TransactionORM.clientid == client_id and TransactionORM.entity == CASH_ENTITY)
     result = await db.execute(stmt)
     return result.scalar_one()
 
