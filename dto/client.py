@@ -1,22 +1,30 @@
 from pydantic import BaseModel, Field
 from typing import Optional
-from datetime import datetime
+import datetime as dt
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 class ClientORM(Base):
     __tablename__ = "client"
-    clientId = Column(Integer, primary_key=True, autoincrement=True)
+    clientid = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100))
-    age = Column(Integer)
-    gender = Column(String(10))
-    PANCard = Column(String(20), unique=True)
-    createdAt = Column(DateTime, default=datetime.utcnow)
-    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    age = Column(Integer, default=None)
+    gender = Column(String(10), default=None)
+    pancard = Column(String(20), unique=True)
+    createdat = Column(DateTime, default=dt.datetime.now())
+    updatedat = Column(DateTime, default=dt.datetime.now(), onupdate=dt.datetime.now())
 
+class CreateClientPayload(BaseModel):
+    name: str
+    age: int = None
+    gender: str
+    pancard: str
 
 class BaseResponse(BaseModel):
     message: str
     isSuccess: bool
     error: Optional[str] = None
+
+class CreteClientResponse(BaseResponse):
+    clientId: int

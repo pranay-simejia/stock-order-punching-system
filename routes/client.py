@@ -1,22 +1,23 @@
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 from services.client import createClient
-from dto.client import ClientORM, BaseResponse
+from dto.client import CreateClientPayload, CreteClientResponse
 
 
 clientRouter = APIRouter(prefix="/client", tags=["clients"])
 
 @clientRouter.put("/create", status_code=status.HTTP_201_CREATED)
-async def createClientRouter(clientData: ClientORM )-> JSONResponse:
+async def createClientRouter(clientData: CreateClientPayload)-> JSONResponse:
     try:
-        client = await createClient(clientData)
-        response = BaseResponse(
-            message="Client created successfully",
+        clientId = await createClient(clientData)
+        response = CreteClientResponse(
+            clientId=clientId,
+            message= f"Client created successfully with id: {clientId}",
             isSuccess=True,
             error=None
         )
         return JSONResponse(
-            content=response.dict(),
+            content=response.model_dump(),
             status_code=status.HTTP_201_CREATED
         )
     except Exception as e:
