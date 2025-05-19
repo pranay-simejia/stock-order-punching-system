@@ -2,7 +2,7 @@ from pydantic import BaseModel, ValidationError, model_validator
 from typing import List
 
 class StockPayload(BaseModel):
-    stockId: str
+    symbol: str
     priority: int
     currentPrice: float
 

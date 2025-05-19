@@ -23,7 +23,7 @@ async def getClientById( client_id: int, db: AsyncSession = db) -> ClientORM:
 
 async def autoPlaceMaxOrder(client_id: int, maxStocks: int, maxAmount: float, defaultStockExchange: str = STOCK_EXCHANGE):
     stocks = await getTopStocks(maxStocks)
-    stocks = [f"{stock["symbol"]}.{defaultStockExchange}" for stock in stocks]
+    stocks = [f"{stock['symbol']}.{defaultStockExchange}" for stock in stocks]
     try:
         stockInfo = {stock: await getCurrentInfo(stock) for stock in stocks}
     except Exception as e:
