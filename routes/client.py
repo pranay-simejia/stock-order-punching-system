@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
-from services.client import createClient, getClientById
-from dto.client import AutoPlaceOrderPayload, BaseResponse, CreateClientPayload, CreteClientResponse
-from dto.client import FindClientResponse, ClientData  # Add ClientData import
+from services.client import createClient, getClientById, getPortfolioByClientId  # <-- import the function
+from dto.client import AutoPlaceOrderPayload, BaseResponse, CreateClientPayload, CreteClientResponse, PortfolioResponse
+from dto.client import FindClientResponse, ClientData
 from services.client import autoPlaceMaxOrder, createClient
 
 
@@ -69,3 +69,24 @@ async def autoPlaceOrder(requestBody: AutoPlaceOrderPayload):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in autoplaceorder: {str(e)}")
+
+@clientRouter.get("/portfolio/{clientId}", status_code=status.HTTP_200_OK)
+async def getClientPortfolio(clientId: int):
+    """
+    Returns the portfolio for the given clientId (entities with total_units > 0 and not CASH).
+    """
+    try:
+        portfolio = await getPortfolioByClientId(clientId)
+        response = PortfolioResponse(
+            message=f"Portfolio fetched successfully for client id: {clientId}",
+            isSuccess=True,
+            error=None,
+            portfolio=portfolio
+        )
+        return JSONResponse(
+            content=response.model_dump(),
+            status_code=status.HTTP_200_OK
+        )
+    except Exception as e:
+        print(f"Error fetching portfolio: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error fetching portfolio: {str(e)}")

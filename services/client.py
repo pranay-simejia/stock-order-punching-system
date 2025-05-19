@@ -1,6 +1,8 @@
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func
+
 from constants import CASH_ENTITY, STOCK_EXCHANGE
 from dto.client import ClientORM, CreateClientPayload  # Your SQLAlchemy ORM model
 from config import db
@@ -16,7 +18,7 @@ async def createClient(clientData: CreateClientPayload, db: AsyncSession = db) -
     return client.clientid
 
 async def getClientById( client_id: int, db: AsyncSession = db) -> ClientORM:
-    result = await db.execute(select(ClientORM).where(ClientORM.clientId == client_id))
+    result = await db.execute(select(ClientORM).where(ClientORM.clientid == client_id))
     return result.scalar_one_or_none()
 
 async def autoPlaceMaxOrder(client_id: int, maxStocks: int, maxAmount: float, defaultStockExchange: str = STOCK_EXCHANGE):
@@ -43,3 +45,32 @@ async def autoPlaceMaxOrder(client_id: int, maxStocks: int, maxAmount: float, de
     await bulkCreateEntry(transactions)
     
     createEntry(client_id=client_id, entity=CASH_ENTITY, unitprice=-1, totalamount=-totalCost, units=totalCost)
+
+async def getPortfolioByClientId(client_id: int, db: AsyncSession = db):
+    """
+    Returns a list of dicts, each representing an entity (stock/cash) with total units > 0,
+    for the given client. Filtering is done in SQL using HAVING and CASH entity is excluded.
+    """
+    stmt = (
+        select(
+            TransactionORM.entity,
+            func.sum(TransactionORM.units).label("total_units"),
+            func.sum(TransactionORM.totalamount).label("total_amount")
+        )
+        .where(
+            TransactionORM.clientid == client_id,
+            TransactionORM.entity != CASH_ENTITY  # Exclude CASH entity
+        )
+        .group_by(TransactionORM.entity)
+        .having(func.sum(TransactionORM.units) > 0)
+    )
+    result = await db.execute(stmt)
+    portfolio = [
+        {
+            "entity": row.entity,
+            "total_units": row.total_units,
+            "total_amount": row.total_amount
+        }
+        for row in result
+    ]
+    return portfolio

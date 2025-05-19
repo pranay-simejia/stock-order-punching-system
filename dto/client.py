@@ -30,6 +30,14 @@ class BaseResponse(BaseModel):
 class CreteClientResponse(BaseResponse):
     clientId: int
 
+class Portfolio(BaseModel):
+    entity: str
+    total_units: int
+    total_amount: float
+    
+class PortfolioResponse(BaseResponse):
+    portfolio: list[Portfolio]
+
 class ClientData(BaseModel):
     clientid: int
     name: str
