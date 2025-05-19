@@ -19,9 +19,12 @@ async def bulkCreateEntry(transactions: List[TransactionORM], db: AsyncSession =
 async def getBalance(client_id: int, db: AsyncSession = db) -> float:
     stmt = select(
         func.coalesce(func.sum(TransactionORM.totalamount), 0.0)
-    ).where(TransactionORM.clientid == client_id and TransactionORM.entity == CASH_ENTITY)
+    ).where(
+        (TransactionORM.clientid == client_id) & (TransactionORM.entity == CASH_ENTITY)
+    )
     result = await db.execute(stmt)
     return result.scalar_one()
+
 
 async def getOrderHistory(client_id: int, db: AsyncSession = db) -> List[Transaction]:
     stmt = select(TransactionORM).where(TransactionORM.clientid == client_id).order_by(TransactionORM.createdat.desc())

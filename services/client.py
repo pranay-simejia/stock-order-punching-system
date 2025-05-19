@@ -44,7 +44,7 @@ async def autoPlaceMaxOrder(client_id: int, maxStocks: int, maxAmount: float, de
     # Place bulk orders here
     await bulkCreateEntry(transactions)
     
-    createEntry(client_id=client_id, entity=CASH_ENTITY, unitprice=-1, totalamount=-totalCost, units=totalCost)
+    await createEntry(client_id=client_id, entity=CASH_ENTITY, unitprice=-1, totalamount=-totalCost, units=totalCost)
 
 async def getPortfolioByClientId(client_id: int, db: AsyncSession = db):
     """
